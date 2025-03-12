@@ -19,7 +19,8 @@
     "dist"
   ],
   "dependencies": {
-    "crypto-js": "^4.2.0"
+    "crypto-js": "^4.2.0",
+    "elliptic": "^6.6.1"
   },
   "scripts": {
     "compile": "npx tsc",

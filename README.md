@@ -17,7 +17,7 @@ JavaScript so it can be used inside of an Expo project.
 
 | HS256 | HS384 | HS512 | RS256 | RS384 | RS512 | ES256 | ES384 | ES512 |
 |-------|-------|-------|-------|-------|-------|-------|-------|-------|
-| Yes   | Yes   | Yes   | No    | No    | No    | No    | No    | No    |
+| Yes   | Yes   | Yes   | No    | No    | No    | Yes   | No    | No    |
 
 ## Supported Claims
 
@@ -46,6 +46,10 @@ JWT.encode({ foo: 'bar' }, key);
 JWT.encode({ foo: 'bar' }, key, { algorithm: SupportedAlgorithms.HS512 });
 // => eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIifQ.Kyojwz8Z5SckLbMU-EImuzHEjjg_1apSOLz_tsZQj1025OH--qaORzkHUkScScd8-RZnWUdCu0epiaofQZNkBA
 
+// For ES256, the key should be a hex-encoded private key
+JWT.encode({ foo: 'bar' }, ecPrivateKey, { algorithm: SupportedAlgorithms.ES256 });
+// => eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIifQ.MEQCIHl14W77hY0pOiXI-idutkJJXWqrMq0pLrPCX7sqfPstAiAFIJxHpKzrwghd_cOv4CLoJIZrWZzXAFbU2LoqzCXu3w
+
 JWT.encode({ foo: 'bar' }, key, { algorithm: SupportedAlgorithms.NONE });
 // => eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJmb28iOiJiYXIifQ.
 ```
@@ -60,6 +64,11 @@ const token =
   'eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIifQ.Kyojwz8Z5SckLbMU-EImuzHEjjg_1apSOLz_tsZQj1025OH--qaORzkHUkScScd8-RZnWUdCu0epiaofQZNkBA';
 
 JWT.decode(token, key);
+// => { foo: 'bar' }
+
+// For ES256, the key should be a hex-encoded public key
+const es256Token = 'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIifQ.MEQCIHl14W77hY0pOiXI-idutkJJXWqrMq0pLrPCX7sqfPstAiAFIJxHpKzrwghd_cOv4CLoJIZrWZzXAFbU2LoqzCXu3w';
+JWT.decode(es256Token, ecPublicKey);
 // => { foo: 'bar' }
 ```
 

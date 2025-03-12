@@ -1,9 +1,12 @@
 import Base64 from 'crypto-js/enc-base64';
 import Utf8 from 'crypto-js/enc-utf8';
+import SHA256 from 'crypto-js/sha256';
+import Hex from 'crypto-js/enc-hex';
+import elliptic from 'elliptic';
 
 import Verifier from './verifier';
 import * as Errors from './errors';
-import algorithms, { supportedAlgorithms } from './algorithms';
+import algorithms, { supportedAlgorithms, JWTAlgorithm } from './algorithms';
 import { urlEncodeBase64, urlSafeBase64ToBase64 } from './helpers';
 
 import {
@@ -14,8 +17,6 @@ import {
   JWTToken,
 } from '../types/jwt';
 
-type AlgorithmFunction = (typeof algorithms)['HS256'];
-
 let _key: EncodingKey;
 
 const parse = (encodedString: string) => {
@@ -23,14 +24,37 @@ const parse = (encodedString: string) => {
   return JSON.parse(Base64.parse(safeEncodeString).toString(Utf8));
 };
 
-const sign = (body: string, algorithm: AlgorithmFunction) =>
-  urlEncodeBase64(algorithm(body, _key).toString(Base64));
+const sign = (body: string, algorithm: JWTAlgorithm) =>
+  urlEncodeBase64(algorithm.sign(body, _key || '').toString(Base64));
+
+// ES256 verification
+const verifyES256 = (data: string, signature: string, key: string): boolean => {
+  try {
+    // Create EC instance with P-256 curve
+    const ec = new elliptic.ec('p256');
+    
+    // Parse the public key
+    const keyPair = ec.keyFromPublic(key, 'hex');
+    
+    // Hash the data
+    const hash = SHA256(data).toString(Hex);
+    
+    // Convert base64 signature to DER format
+    const derSignature = Buffer.from(urlSafeBase64ToBase64(signature), 'base64');
+    
+    // Verify the signature
+    return keyPair.verify(hash, derSignature);
+  } catch (error) {
+    console.error('ES256 verification error:', error);
+    return false;
+  }
+};
 
 class Decoder<T> {
   _header: JWTHeader;
   _body: JWTBody<T>;
   options: DecodingOptions;
-  algorithm: 'none' | AlgorithmFunction;
+  algorithm: 'none' | JWTAlgorithm;
   signature: string;
 
   constructor(key: EncodingKey) {
@@ -78,8 +102,16 @@ class Decoder<T> {
 
     const signatureBody = `${encodedHeader}.${encodedBody}`;
 
-    if (this.signature !== sign(signatureBody, this.algorithm)) {
-      throw new Errors.SignatureInvalid();
+    if (this._header.alg === 'ES256') {
+      // Special handling for ES256
+      if (!_key || !verifyES256(signatureBody, this.signature, _key)) {
+        throw new Errors.SignatureInvalid();
+      }
+    } else {
+      // Standard verification for other algorithms
+      if (this.signature !== sign(signatureBody, this.algorithm)) {
+        throw new Errors.SignatureInvalid();
+      }
     }
 
     return true;

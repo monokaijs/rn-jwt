@@ -70,7 +70,7 @@ class Encoder {
       throw new AlgorithmNotSupported();
     }
 
-    const signature = algorithm(`${encodedHeader}.${encodedBody}`, _key);
+    const signature = algorithm.sign(`${encodedHeader}.${encodedBody}`, _key || '');
     const encodedSignature = signature.toString(Base64);
     const urlSafeEncodedSignature = urlEncodeBase64(encodedSignature);
 
