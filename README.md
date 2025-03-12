@@ -1,4 +1,4 @@
-# expo-jwt [![Build Status](https://app.travis-ci.com/blake-simpson/expo-jwt.svg?branch=master)](https://app.travis-ci.com/blake-simpson/expo-jwt)
+# rn-jwt [![Build Status](https://app.travis-ci.com/blake-simpson/rn-jwt.svg?branch=master)](https://app.travis-ci.com/blake-simpson/rn-jwt)
 
 A library for encoding or decoding JSON Web Tokens (JWT) in an Expo based React
 Native project.
@@ -28,7 +28,7 @@ JavaScript so it can be used inside of an Expo project.
 ## Installation
 
 ```bash
-npm install --save expo-jwt
+npm install --save rn-jwt
 ```
 
 ## Usage
@@ -36,7 +36,7 @@ npm install --save expo-jwt
 ### Encode
 
 ```js
-import JWT, { SupportedAlgorithms } from 'expo-jwt';
+import JWT, { SupportedAlgorithms } from 'rn-jwt';
 
 const key = 'shh';
 
@@ -57,7 +57,7 @@ JWT.encode({ foo: 'bar' }, key, { algorithm: SupportedAlgorithms.NONE });
 ### Decode
 
 ```js
-import JWT from 'expo-jwt';
+import JWT from 'rn-jwt';
 
 const key = 'shh';
 const token =
@@ -106,7 +106,7 @@ JWT.decode(token, key, { aud: 'expected-audience' });
 
 ### Time Skew
 
-As mentioned in [issue 7](https://github.com/kartenmacherei/expo-jwt/issues/7)
+As mentioned in [issue 7](https://github.com/kartenmacherei/rn-jwt/issues/7)
 certain device clocks may be slightly off, causing time based claims to fail. If
 you are experiencing this issue you can pass the option `timeSkew` to
 `JWT.decode` which will take this into account.
